@@ -1,24 +1,38 @@
 from fastapi import APIRouter
 from typing import Any
 from app.schemas.interaction import ChatRequest, ChatResponse
+from app.graph.graph import crm_agent
+from langchain_core.messages import HumanMessage
 
 router = APIRouter()
 
 @router.post("/", response_model=ChatResponse)
 async def chat_interaction(request: ChatRequest) -> Any:
-    # TODO: Connect to LangGraph Agent
-    # The LangGraph agent will process the natural language,
-    # decide whether to extract info, search, edit, or recommend.
+    # Initialize state
+    initial_state = {
+        "messages": [HumanMessage(content=request.message)],
+        "current_intent": None,
+        "extracted_entities": {},
+        "selected_tool": None,
+        "tool_output": None,
+        "memory_context": "",
+        "final_response": None,
+        "needs_confirmation": True
+    }
     
-    # Mock response
+    # Invoke Graph
+    result_state = await crm_agent.ainvoke(initial_state)
+    
+    # Map back to response
+    entities = result_state.get("extracted_entities", {})
     return {
         "summary_generated": True,
-        "doctor": "Dr. Mock Sharma",
-        "hospital": "Mock Hospital",
-        "products": ["Mock Product"],
-        "sentiment": "Positive",
-        "action_items": ["Send Mock Brochure"],
-        "follow_up": "Next Tuesday",
-        "needs_confirmation": True,
-        "ai_message": "I have extracted the details. Would you like me to save this interaction?"
+        "doctor": entities.get("doctor"),
+        "hospital": entities.get("hospital"),
+        "products": entities.get("products", []),
+        "sentiment": entities.get("sentiment"),
+        "action_items": entities.get("action_items", []),
+        "follow_up": entities.get("follow_up"),
+        "needs_confirmation": result_state.get("needs_confirmation", True),
+        "ai_message": result_state.get("final_response", "Processed successfully.")
     }
