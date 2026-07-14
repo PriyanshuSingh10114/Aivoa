@@ -6,7 +6,7 @@ import { useSelector } from 'react-redux';
 import { Box } from '@mui/material';
 
 export const InteractionPreviewCard = () => {
-  const formData = useSelector(state => state.form);
+  const { interactionForm: form } = useSelector(state => state.form);
 
   return (
     <Card sx={{ mb: 3 }}>
@@ -17,35 +17,35 @@ export const InteractionPreviewCard = () => {
       <Box>
         <PreviewRow 
           label="Doctor Name" 
-          value={formData.doctor_name} 
+          value={form.doctorName} 
           score={98} 
         />
         <PreviewRow 
           label="Hospital / Clinic" 
-          value={formData.hospital} 
+          value={form.hospital} 
           score={95} 
         />
         <PreviewRow 
           label="Products Discussed" 
-          value={formData.products_discussed} 
+          value={form.productsDiscussed} 
           type="list"
           score={92} 
         />
         <PreviewRow 
           label="Doctor Sentiment" 
-          value={formData.sentiment} 
+          value={form.sentiment} 
           type="sentiment"
           score={88} 
         />
         <PreviewRow 
           label="Action Items" 
-          value={formData.action_items} 
+          value={form.actionItems} 
           type="list"
           score={85} 
         />
         <PreviewRow 
           label="Next Follow-up" 
-          value={formData.next_follow_up_date} 
+          value={form.nextFollowUpDate} 
           score={99} 
         />
       </Box>

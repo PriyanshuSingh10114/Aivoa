@@ -41,7 +41,7 @@ const formSlice = createSlice({
           hospital: response.hospital || state.interactionForm.hospital,
           productsDiscussed: response.products || state.interactionForm.productsDiscussed,
           sentiment: response.sentiment || state.interactionForm.sentiment,
-          discussionNotes: response.action_items ? response.action_items.join(', ') : state.interactionForm.discussionNotes,
+          actionItems: response.action_items || state.interactionForm.actionItems,
           nextFollowUpDate: response.follow_up || state.interactionForm.nextFollowUpDate
         };
       }

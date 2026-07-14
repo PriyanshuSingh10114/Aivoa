@@ -40,12 +40,14 @@ export const ConversationInput = ({ onSend, disabled }) => {
           onChange={(e) => setInput(e.target.value)}
           onKeyPress={(e) => e.key === 'Enter' && handleSend()}
           disabled={disabled}
+          inputProps={{ 'aria-label': 'Ask Copilot' }}
           sx={{ fontSize: 14 }}
         />
         <IconButton 
           color="primary" 
           onClick={handleSend} 
           disabled={!input.trim() || disabled}
+          aria-label="Send message"
           sx={{ 
             bgcolor: input.trim() ? 'primary.main' : 'transparent', 
             color: input.trim() ? 'white' : 'text.disabled', 

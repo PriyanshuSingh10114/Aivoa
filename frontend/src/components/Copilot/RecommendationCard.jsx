@@ -2,12 +2,8 @@ import React from 'react';
 import { Box, Typography, Button, Stack } from '@mui/material';
 import { Target } from 'lucide-react';
 
-export const RecommendationCard = ({ onActionClick }) => {
-  const actions = [
-    "Bring CardioX samples",
-    "Share efficacy paper",
-    "Ask about Gastrolin side effects"
-  ];
+export const RecommendationCard = ({ onActionClick, actions = [] }) => {
+  if (!actions || actions.length === 0) return null;
 
   return (
     <Box sx={{ 

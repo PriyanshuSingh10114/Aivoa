@@ -3,7 +3,11 @@ import { Box, Typography, Button, IconButton } from '@mui/material';
 import { Sparkles, CheckCircle2, Save } from 'lucide-react';
 import { StatusChip } from '../Shared/StatusChip';
 
+import { useSelector } from 'react-redux';
+
 export const TopNavbar = () => {
+  const { interactionForm: form } = useSelector(state => state.form);
+
   return (
     <Box 
       sx={{ 
@@ -29,12 +33,14 @@ export const TopNavbar = () => {
           status="positive"
           sx={{ mr: 1 }}
         />
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, px: 2, py: 0.5, bgcolor: '#F8FAFC', borderRadius: 2, border: '1px solid #E2E8F0' }}>
-          <CheckCircle2 size={16} color="#10B981" />
-          <Typography variant="caption" sx={{ color: 'text.secondary', textTransform: 'none', fontWeight: 500 }}>
-            Dr. Rajesh Kumar Selected
-          </Typography>
-        </Box>
+        {form.doctorName && (
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, px: 2, py: 0.5, bgcolor: '#F8FAFC', borderRadius: 2, border: '1px solid #E2E8F0' }}>
+            <CheckCircle2 size={16} color="#10B981" />
+            <Typography variant="caption" sx={{ color: 'text.secondary', textTransform: 'none', fontWeight: 500 }}>
+              {form.doctorName} Selected
+            </Typography>
+          </Box>
+        )}
         <Typography variant="caption" sx={{ color: 'text.secondary', mx: 2 }}>
           {new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
         </Typography>

@@ -2,7 +2,9 @@ import React from 'react';
 import { Box, Typography } from '@mui/material';
 import { Lightbulb } from 'lucide-react';
 
-export const InsightCard = () => {
+export const InsightCard = ({ insight }) => {
+  if (!insight) return null;
+
   return (
     <Box sx={{ 
       p: 2, 
@@ -20,8 +22,7 @@ export const InsightCard = () => {
           Smart Insight
         </Typography>
         <Typography variant="body2" sx={{ color: '#92400E', lineHeight: 1.5 }}>
-          Dr. Kumar has not been visited in 18 days. His engagement score is High (92). 
-          Last time you discussed CardioX.
+          {insight}
         </Typography>
       </Box>
     </Box>
