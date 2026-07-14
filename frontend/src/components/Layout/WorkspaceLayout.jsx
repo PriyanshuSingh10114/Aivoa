@@ -1,49 +1,50 @@
 import React from 'react';
 import { Box } from '@mui/material';
-import { Sidebar } from './Sidebar';
-import { TopNavbar } from './TopNavbar';
+import { EnterpriseHeader } from './EnterpriseHeader';
+import { EnterpriseFooter } from './EnterpriseFooter';
 
 export const WorkspaceLayout = ({ leftPanel, rightPanel }) => {
   return (
-    <Box sx={{ display: 'flex', height: '100vh', width: '100vw', overflow: 'hidden', bgcolor: '#F8FAFC' }}>
-      <Sidebar />
+    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh', width: '100vw', overflow: 'hidden', bgcolor: '#F8FAFC' }}>
       
-      <Box sx={{ display: 'flex', flexDirection: 'column', flexGrow: 1, overflow: 'hidden' }}>
-        <TopNavbar />
-        
-        {/* Main Split Workspace */}
-        <Box sx={{ display: 'flex', flexGrow: 1, overflow: 'hidden' }}>
-          
-          {/* Left Column (65%) */}
-          <Box 
-            sx={{ 
-              width: '65%', 
-              height: '100%', 
-              overflowY: 'auto',
-              p: 4
-            }}
-          >
-            <Box sx={{ maxWidth: 900, mx: 'auto' }}>
-              {leftPanel}
-            </Box>
-          </Box>
+      <EnterpriseHeader />
 
-          {/* Right Column (35%) */}
-          <Box 
-            sx={{ 
-              width: '35%', 
-              height: '100%', 
-              borderLeft: '1px solid #E2E8F0',
-              bgcolor: '#FFFFFF',
-              display: 'flex',
-              flexDirection: 'column'
-            }}
-          >
+      {/* Main Split Workspace */}
+      <Box sx={{ display: 'flex', flexGrow: 1, overflow: 'hidden' }}>
+        
+        {/* Left Column - AI Chat (40%) */}
+        <Box 
+          sx={{ 
+            width: '40%', 
+            height: '100%', 
+            bgcolor: '#FFFFFF',
+            borderRight: '1px solid #E2E8F0',
+            display: 'flex',
+            flexDirection: 'column'
+          }}
+        >
+          {leftPanel}
+        </Box>
+
+        {/* Right Column - Live CRM Preview (60%) */}
+        <Box 
+          sx={{ 
+            width: '60%', 
+            height: '100%', 
+            overflowY: 'auto',
+            p: 4,
+            display: 'flex',
+            flexDirection: 'column'
+          }}
+        >
+          <Box sx={{ maxWidth: 800, mx: 'auto', width: '100%' }}>
             {rightPanel}
           </Box>
-          
         </Box>
+        
       </Box>
+
+      <EnterpriseFooter />
     </Box>
   );
 };

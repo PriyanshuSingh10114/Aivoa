@@ -38,6 +38,11 @@ const chatSlice = createSlice({
     },
     setAiSuggestions: (state, action) => {
       state.aiSuggestions = action.payload;
+    },
+    clearChat: (state) => {
+      state.chatMessages = initialState.chatMessages;
+      state.aiSuggestions = null;
+      state.error = null;
     }
   },
   extraReducers: (builder) => {
@@ -74,5 +79,5 @@ const chatSlice = createSlice({
   }
 });
 
-export const { setAiSuggestions } = chatSlice.actions;
+export const { setAiSuggestions, clearChat } = chatSlice.actions;
 export default chatSlice.reducer;

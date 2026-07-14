@@ -12,8 +12,12 @@ export const chatWithAgent = async (message) => {
   return response.data;
 };
 
-export const saveInteraction = async (data) => {
-  const response = await api.post('/interaction/', data);
+export const saveInteraction = async (data, chatMessages = []) => {
+  const payload = {
+    data,
+    conversation: chatMessages
+  };
+  const response = await api.post('/interaction/', payload);
   return response.data;
 };
 

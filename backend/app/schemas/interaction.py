@@ -94,3 +94,12 @@ class ChatResponse(BaseModel):
     confidence: Dict[str, Optional[str]] = {}
     status: str = "success"
     needs_confirmation: bool = True
+
+class ConversationMessageSchema(BaseModel):
+    sender: str
+    text: str
+    timestamp: Optional[str] = None
+
+class SaveInteractionRequest(BaseModel):
+    data: StructuredData
+    conversation: List[ConversationMessageSchema] = []
