@@ -1,79 +1,72 @@
-import React, { useState } from 'react';
-import { Box, Typography, Grid, Card, CardContent, Tabs, Tab } from '@mui/material';
-import InteractionForm from '../components/InteractionForm';
-import AIChatView from '../components/AIChatView';
-import AISuggestionsCard from '../components/AISuggestionsCard';
-import { FileText, MessageSquare } from 'lucide-react';
+import React from 'react';
+import { Box, Grid, Typography } from '@mui/material';
+import { Sparkles } from 'lucide-react';
+import PageHeader from '../components/Layout/PageHeader';
+import HCPInfoCard from '../components/LogInteraction/HCPInfoCard';
+import DetailsCard from '../components/LogInteraction/DetailsCard';
+import DiscussionCard from '../components/LogInteraction/DiscussionCard';
+import MaterialCard from '../components/LogInteraction/MaterialCard';
+import OutcomeCard from '../components/LogInteraction/OutcomeCard';
+import Timeline from '../components/LogInteraction/Timeline/Timeline';
+import FloatingSaveBar from '../components/LogInteraction/FloatingSaveBar';
+import AIChat from '../components/Copilot/AIChat';
+import AISummaryCard from '../components/Copilot/AISummaryCard';
+import InsightCard from '../components/Copilot/InsightCard';
 
 const LogInteraction = () => {
-  const [tabValue, setTabValue] = useState(0);
-
-  const handleTabChange = (event, newValue) => {
-    setTabValue(newValue);
-  };
-
   return (
-    <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-      <Typography variant="h4" mb={1} color="primary.main">
-        Log Interaction
-      </Typography>
-      <Typography variant="body1" color="text.secondary" mb={3}>
-        Record your HCP visit via structured form or let the AI assistant process it from natural language.
-      </Typography>
+    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', position: 'relative' }}>
+      <PageHeader />
       
-      <Grid container spacing={3} sx={{ flexGrow: 1, height: '10px' }}>
-        {/* Left Side - Input Views (Form or Chat) */}
-        <Grid item xs={12} md={7} sx={{ height: '100%' }}>
-          <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-            <Box sx={{ borderBottom: 1, borderColor: 'divider', bgcolor: '#F8FAFC' }}>
-              <Tabs value={tabValue} onChange={handleTabChange} aria-label="interaction input tabs" variant="fullWidth">
-                <Tab 
-                  icon={<FileText size={18} style={{ marginBottom: 0, marginRight: 8 }} />} 
-                  iconPosition="start"
-                  label="Form View" 
-                  id="tab-0" 
-                  sx={{ minHeight: 60, fontWeight: 600 }}
-                />
-                <Tab 
-                  icon={<MessageSquare size={18} style={{ marginBottom: 0, marginRight: 8 }} />} 
-                  iconPosition="start"
-                  label="AI Chat View" 
-                  id="tab-1" 
-                  sx={{ minHeight: 60, fontWeight: 600 }}
-                />
-              </Tabs>
-            </Box>
-            <CardContent sx={{ flexGrow: 1, overflow: 'hidden', p: 3 }}>
-              {tabValue === 0 && <InteractionForm />}
-              {tabValue === 1 && <AIChatView />}
-            </CardContent>
-          </Card>
+      <Grid container spacing={3} sx={{ flexGrow: 1, m: 0, width: '100%' }}>
+        {/* Left Column (70%) - Form & Timeline */}
+        <Grid item xs={12} md={8} lg={8.5} sx={{ pl: '0 !important', pt: '0 !important', height: 'calc(100vh - 140px)', overflowY: 'auto', pr: 1 }}>
+          <HCPInfoCard />
+          <DetailsCard />
+          <DiscussionCard />
+          <MaterialCard />
+          <OutcomeCard />
+          <Timeline />
+          {/* Spacer for floating bar */}
+          <Box sx={{ height: 100 }} />
         </Grid>
 
-        {/* Right Side - AI Assistant / Suggestions & History */}
-        <Grid item xs={12} md={5} sx={{ height: '100%' }}>
-          <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column', gap: 3 }}>
+        {/* Right Column (30%) - AI Copilot Engine */}
+        <Grid item xs={12} md={4} lg={3.5} sx={{ pt: '0 !important', height: 'calc(100vh - 140px)', display: 'flex', flexDirection: 'column' }}>
+          {/* Copilot Header */}
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2, px: 1 }}>
+            <Sparkles size={20} color="#2563EB" />
+            <Box>
+              <Typography variant="subtitle1" fontWeight="bold" lineHeight={1.2}>AI Copilot</Typography>
+              <Typography variant="caption" color="text.secondary">Powered by LangGraph & Groq</Typography>
+            </Box>
+          </Box>
+          
+          {/* Copilot Content Scrollable Area */}
+          <Box sx={{ flexGrow: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 2, pb: 2, px: 1 }}>
+            <AISummaryCard />
+            <InsightCard />
             
-            {/* Suggestions Card */}
-            <Card sx={{ bgcolor: 'white', border: '1px solid #E2E8F0', boxShadow: 'none' }}>
-              <CardContent>
-                <Typography variant="h6" mb={2} color="primary.main" fontWeight="bold">AI Insights & Tasks</Typography>
-                <AISuggestionsCard />
-              </CardContent>
-            </Card>
-
-            {/* Timeline Placeholder */}
-            <Card sx={{ flexGrow: 1, bgcolor: '#F8FAFC', border: '1px dashed #CBD5E1', boxShadow: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <CardContent sx={{ textAlign: 'center' }}>
-                <Typography variant="body1" color="text.secondary">
-                  Interaction History Timeline will appear here once an HCP is selected.
-                </Typography>
-              </CardContent>
-            </Card>
-            
+            {/* The Chat Widget takes up the remaining space */}
+            <Box sx={{ 
+              flexGrow: 1, 
+              minHeight: 400, 
+              bgcolor: 'white', 
+              borderRadius: 4, 
+              border: '1px solid #E5E7EB',
+              boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.05)',
+              display: 'flex',
+              flexDirection: 'column',
+              overflow: 'hidden'
+            }}>
+              <AIChat />
+            </Box>
           </Box>
         </Grid>
       </Grid>
+      
+      {/* Persistent floating action bar for saving form data */}
+      <FloatingSaveBar />
     </Box>
   );
 };
