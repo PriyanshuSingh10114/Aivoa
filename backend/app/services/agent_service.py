@@ -8,37 +8,40 @@ logger = logging.getLogger(__name__)
 class AgentService:
     async def process_chat(self, message: str, session_id: str = "default_session") -> Dict[str, Any]:
         """
-        Process a user message through the LangGraph AI Agent with conversation memory.
+        Process a user message through the LangGraph AI Agent with Veeva CRM pipeline.
         """
         try:
             initial_state = {
                 "messages": [HumanMessage(content=message)],
                 "current_intent": None,
+                "memory_context": "",
                 "extracted_entities": {},
+                "crm_mapped_data": {},
+                "confidence_scores": {},
+                "validation_status": {},
                 "selected_tool": None,
                 "tool_output": None,
-                "memory_context": "",
                 "final_response": None,
                 "needs_confirmation": True
             }
             
             config = {"configurable": {"thread_id": session_id}}
             
-            # Invoke LangGraph
+            logger.info(f"Invoking Veeva CRM LangGraph for session {session_id}")
             result_state = await crm_agent.ainvoke(initial_state, config=config)
             
-            # Extract and format response
             entities = result_state.get("extracted_entities", {})
+            confidence = result_state.get("confidence_scores", {})
+            
+            logger.info(f"Final extracted entities from state: {entities}")
+            logger.info(f"Final confidence scores: {confidence}")
+            
             return {
-                "summary_generated": True,
-                "doctor": entities.get("doctor"),
-                "hospital": entities.get("hospital"),
-                "products": entities.get("products", []),
-                "sentiment": entities.get("sentiment"),
-                "action_items": entities.get("action_items", []),
-                "follow_up": entities.get("follow_up"),
+                "reply": result_state.get("final_response", "Veeva CRM update processed successfully."),
+                "structured_data": entities,
+                "confidence": confidence,
                 "needs_confirmation": result_state.get("needs_confirmation", True),
-                "ai_message": result_state.get("final_response", "Processed successfully.")
+                "status": "success"
             }
         except Exception as e:
             logger.error(f"Error processing chat message: {str(e)}", exc_info=True)

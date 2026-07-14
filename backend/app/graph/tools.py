@@ -11,7 +11,7 @@ async def log_interaction_tool(entities: Dict[str, Any]) -> Dict[str, Any]:
     async with SessionLocal() as db:
         try:
             # 1. Ensure HCP exists
-            hcp_name = entities.get("doctor", "Unknown Doctor")
+            hcp_name = entities.get("doctor_name", "Unknown Doctor")
             result = await db.execute(select(HCP).filter(HCP.name == hcp_name))
             hcp = result.scalars().first()
             if not hcp:
@@ -45,7 +45,7 @@ async def edit_interaction_tool(entities: Dict[str, Any]) -> Dict[str, Any]:
 
 async def search_interaction_tool(query: str) -> Dict[str, Any]:
     async with SessionLocal() as db:
-        result = await db.execute(select(Interaction).limit(5))
+        result = await db.execute(select(Interaction).order_by(Interaction.visit_date.desc()).limit(5))
         interactions = result.scalars().all()
         return {
             "status": "success",
@@ -75,10 +75,10 @@ async def execute_tool(tool_name: str, args: Dict[str, Any]) -> Dict[str, Any]:
     elif tool_name == "edit_interaction_tool":
         return await edit_interaction_tool(args)
     elif tool_name == "search_interaction_tool":
-        return await search_interaction_tool(args.get("doctor", "general"))
+        return await search_interaction_tool(args.get("doctor_name", "general"))
     elif tool_name == "follow_up_recommendation_tool":
-        return await follow_up_recommendation_tool(args.get("doctor", "Unknown"))
+        return await follow_up_recommendation_tool(args.get("doctor_name", "Unknown"))
     elif tool_name == "interaction_insights_tool":
-        return await interaction_insights_tool(args.get("doctor", "Unknown"))
+        return await interaction_insights_tool(args.get("doctor_name", "Unknown"))
     else:
         return {"status": "error", "message": f"Tool {tool_name} not found"}

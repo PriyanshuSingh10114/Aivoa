@@ -1,79 +1,108 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, Date, DateTime, Text, Float, Boolean, Table
+import uuid
+from sqlalchemy import (
+    Column, String, Integer, ForeignKey, Date, DateTime, Text, Boolean, Table
+)
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
+from sqlalchemy.dialects.postgresql import UUID, JSONB
 from app.db.base_class import Base
-
-# Association table for interaction <-> products
-interaction_products = Table(
-    'interaction_products',
-    Base.metadata,
-    Column('interaction_id', Integer, ForeignKey('interaction.id', ondelete="CASCADE"), primary_key=True),
-    Column('product_id', Integer, ForeignKey('product.id', ondelete="CASCADE"), primary_key=True)
-)
-
-class User(Base):
-    __tablename__ = "users"
-    id = Column(Integer, primary_key=True, index=True)
-    email = Column(String, unique=True, index=True, nullable=False)
-    name = Column(String, nullable=False)
-    hashed_password = Column(String, nullable=False)
-    role = Column(String, default="rep")
-    
-    interactions = relationship("Interaction", back_populates="user")
-    activity_logs = relationship("ActivityLog", back_populates="user")
 
 class HCP(Base):
     __tablename__ = "hcp"
-    id = Column(Integer, primary_key=True, index=True)
-    name = Column(String, index=True, nullable=False)
-    hospital = Column(String, nullable=False)
-    speciality = Column(String)
-    engagement_score = Column(Float, default=0.0)
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
+    hcp_code = Column(String, unique=True, index=True)
+    full_name = Column(String, index=True, nullable=False)
+    hospital_name = Column(String, index=True)
+    speciality = Column(String, index=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
     
     interactions = relationship("Interaction", back_populates="hcp")
 
+
 class Product(Base):
-    __tablename__ = "product"
-    id = Column(Integer, primary_key=True, index=True)
-    name = Column(String, index=True, nullable=False)
-    category = Column(String)
-    description = Column(Text)
+    __tablename__ = "products"
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
+    product_name = Column(String, index=True, nullable=False)
+    status = Column(String, default="Active")
+
 
 class Interaction(Base):
-    __tablename__ = "interaction"
-    id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey("users.id"))
-    hcp_id = Column(Integer, ForeignKey("hcp.id"))
-    interaction_type = Column(String, default="In-Person")
-    visit_date = Column(Date, nullable=False)
-    duration = Column(Integer, default=15)
-    discussion_notes = Column(Text)
+    __tablename__ = "interactions"
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
+    hcp_id = Column(UUID(as_uuid=True), ForeignKey("hcp.id", ondelete="CASCADE"), index=True)
+    interaction_type = Column(String, index=True) # Normalized (e.g. Meeting)
+    date = Column(Date, index=True, nullable=False)
+    duration = Column(Integer)  # in minutes
+    summary = Column(Text)
     doctor_feedback = Column(Text)
-    sentiment = Column(String)
-    visit_title = Column(String)
+    objections = Column(JSONB) # Stored as array of strings
+    competitor_mentions = Column(JSONB) # Stored as array of strings
+    sentiment = Column(String) # Positive, Neutral, Negative
+    prescription_intent = Column(String) # High, Medium, Low
+    next_best_action = Column(String)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
-    
-    user = relationship("User", back_populates="interactions")
-    hcp = relationship("HCP", back_populates="interactions")
-    products = relationship("Product", secondary=interaction_products)
-    followups = relationship("Followup", back_populates="interaction", cascade="all, delete-orphan")
 
-class Followup(Base):
-    __tablename__ = "followup"
-    id = Column(Integer, primary_key=True, index=True)
-    interaction_id = Column(Integer, ForeignKey("interaction.id", ondelete="CASCADE"))
-    due_date = Column(Date, nullable=False)
-    task_description = Column(Text, nullable=False)
-    status = Column(String, default="Pending")
+    hcp = relationship("HCP", back_populates="interactions")
+    
+    # Sub-Tables
+    interaction_products = relationship("InteractionProduct", back_populates="interaction", cascade="all, delete-orphan")
+    materials_shared = relationship("MaterialShared", back_populates="interaction", cascade="all, delete-orphan")
+    followups = relationship("FollowUp", back_populates="interaction", cascade="all, delete-orphan")
+    ai_extraction = relationship("AIExtraction", back_populates="interaction", uselist=False, cascade="all, delete-orphan")
+    conversation_history = relationship("ConversationHistory", back_populates="interaction", cascade="all, delete-orphan")
+
+
+class InteractionProduct(Base):
+    __tablename__ = "interaction_products"
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    interaction_id = Column(UUID(as_uuid=True), ForeignKey("interactions.id", ondelete="CASCADE"), index=True)
+    product_id = Column(UUID(as_uuid=True), ForeignKey("products.id", ondelete="CASCADE"), index=True)
+    discussion_type = Column(String) # "Primary" or "Secondary"
+    
+    interaction = relationship("Interaction", back_populates="interaction_products")
+    product = relationship("Product")
+
+
+class MaterialShared(Base):
+    __tablename__ = "materials_shared"
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    interaction_id = Column(UUID(as_uuid=True), ForeignKey("interactions.id", ondelete="CASCADE"), index=True)
+    material_name = Column(String) # e.g. "Clinical Brochure"
+    is_sample = Column(Boolean, default=False)
+    quantity = Column(Integer, default=1)
+    
+    interaction = relationship("Interaction", back_populates="materials_shared")
+
+
+class FollowUp(Base):
+    __tablename__ = "followups"
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    interaction_id = Column(UUID(as_uuid=True), ForeignKey("interactions.id", ondelete="CASCADE"), index=True)
+    scheduled_date = Column(Date, index=True)
+    notes = Column(Text)
+    status = Column(String, default="Scheduled")
     
     interaction = relationship("Interaction", back_populates="followups")
 
-class ActivityLog(Base):
-    __tablename__ = "activity_log"
-    id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey("users.id"))
-    action = Column(String, nullable=False)
+
+class ConversationHistory(Base):
+    __tablename__ = "conversation_history"
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    interaction_id = Column(UUID(as_uuid=True), ForeignKey("interactions.id", ondelete="CASCADE"), index=True)
+    role = Column(String) # user or assistant
+    message = Column(Text)
     timestamp = Column(DateTime(timezone=True), server_default=func.now())
     
-    user = relationship("User", back_populates="activity_logs")
+    interaction = relationship("Interaction", back_populates="conversation_history")
+
+
+class AIExtraction(Base):
+    __tablename__ = "ai_extractions"
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    interaction_id = Column(UUID(as_uuid=True), ForeignKey("interactions.id", ondelete="CASCADE"), index=True, unique=True)
+    structured_json = Column(JSONB)
+    model_used = Column(String)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    
+    interaction = relationship("Interaction", back_populates="ai_extraction")

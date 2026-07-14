@@ -52,12 +52,12 @@ const chatSlice = createSlice({
         state.chatMessages.push({
           id: Date.now(),
           sender: 'ai',
-          text: action.payload.ai_message || 'Processed successfully.',
+          text: action.payload.reply || 'Processed successfully.',
           timestamp: new Date().toISOString()
         });
         
-        // Update suggestions
-        if (action.payload.summary_generated) {
+        // Update suggestions if data is valid
+        if (action.payload.status === "success") {
           state.aiSuggestions = action.payload;
         }
       })

@@ -2,30 +2,36 @@ from typing import Annotated, TypedDict, List, Dict, Any, Optional
 from langchain_core.messages import BaseMessage
 from langgraph.graph.message import add_messages
 
+def merge_entities(old_entities: Dict[str, Any], new_entities: Dict[str, Any]) -> Dict[str, Any]:
+    if not old_entities:
+        return new_entities or {}
+    
+    merged = old_entities.copy()
+    if not new_entities:
+        return merged
+        
+    for k, v in new_entities.items():
+        if v is not None:
+            if isinstance(v, list) and len(v) == 0:
+                continue
+            if isinstance(v, str) and v == "":
+                continue
+            if isinstance(v, dict) and k in merged and isinstance(merged[k], dict):
+                merged[k] = merge_entities(merged[k], v)
+            else:
+                merged[k] = v
+    return merged
+
 class GraphState(TypedDict):
-    """
-    Represents the state of our AI-First CRM Agent.
-    """
-    # Using add_messages to append new messages to the existing list
     messages: Annotated[List[BaseMessage], add_messages]
-    
-    # Detected intent of the user (e.g., "log_interaction", "search_history", "edit_interaction")
     current_intent: Optional[str]
-    
-    # Structured data extracted from natural language
-    extracted_entities: Dict[str, Any]
-    
-    # The name of the tool to execute
-    selected_tool: Optional[str]
-    
-    # The output from the executed tool
-    tool_output: Optional[Dict[str, Any]]
-    
-    # Contextual memory fetched from DB (e.g., past interactions)
     memory_context: str
-    
-    # A formatted response string to send back to the user
+    extracted_entities: Annotated[Dict[str, Any], merge_entities]
+    crm_mapped_data: Dict[str, Any]
+    confidence_scores: Dict[str, Any]
+    validation_status: Dict[str, Any]
+    selected_tool: Optional[str]
+    tool_output: Optional[Dict[str, Any]]
     final_response: Optional[str]
-    
-    # Flag to indicate if we need user confirmation before saving
     needs_confirmation: bool
+

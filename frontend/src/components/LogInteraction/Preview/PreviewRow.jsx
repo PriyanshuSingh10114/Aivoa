@@ -7,7 +7,7 @@ export const PreviewRow = ({ label, value, type = "text", score = 95, source = "
   const isEmpty = !value || (Array.isArray(value) && value.length === 0);
 
   const renderValue = () => {
-    if (isEmpty) return <Typography variant="body2" color="text.disabled">Awaiting extraction...</Typography>;
+    if (isEmpty) return <Typography variant="body2" color="text.disabled">Not Detected</Typography>;
 
     if (type === "list" && Array.isArray(value)) {
       return (
@@ -32,16 +32,13 @@ export const PreviewRow = ({ label, value, type = "text", score = 95, source = "
       '&:last-child': { borderBottom: 'none', pb: 0 },
       alignItems: 'flex-start'
     }}>
-      <Box sx={{ width: '25%', pr: 2 }}>
+      <Box sx={{ width: '35%', pr: 2 }}>
         <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', mb: 0.5 }}>
           {label}
         </Typography>
       </Box>
-      <Box sx={{ width: '55%', pr: 2 }}>
+      <Box sx={{ width: '65%', pr: 2 }}>
         {renderValue()}
-      </Box>
-      <Box sx={{ width: '20%', display: 'flex', justifyContent: 'flex-end', opacity: isEmpty ? 0 : 1, transition: 'opacity 0.3s' }}>
-        <ConfidenceBadge score={score} source={source} />
       </Box>
     </Box>
   );

@@ -1,108 +1,173 @@
 import json
+import re
+from functools import lru_cache
 from langchain_core.messages import HumanMessage
 from langchain_groq import ChatGroq
 from app.graph.state import GraphState
 from app.graph.prompts import (
     INTENT_DETECTION_PROMPT, 
     ENTITY_EXTRACTION_PROMPT, 
-    RESPONSE_FORMATTER_PROMPT,
-    TOOL_SELECTION_PROMPT
+    RESPONSE_FORMATTER_PROMPT
 )
-from app.graph.tools import execute_tool
 from app.core.config import settings
+from app.schemas.interaction import StructuredData
+from pydantic import BaseModel, Field, ValidationError
+from typing import Optional, List, Dict, Any, Literal
+import logging
 
+logger = logging.getLogger(__name__)
+
+@lru_cache(maxsize=1)
 def get_llm():
-    # If API key is not set, we'll return a mock LLM or handle it gracefully.
-    # For a real run, this needs a valid GROQ_API_KEY.
-    return ChatGroq(model_name="gemma2-9b-it", groq_api_key=settings.GROQ_API_KEY)
+    # Enforce JSON mode natively if the model supports it, otherwise standard generation
+    return ChatGroq(model_name="llama-3.1-8b-instant", groq_api_key=settings.GROQ_API_KEY)
 
-def detect_intent(state: GraphState) -> GraphState:
+async def detect_intent(state: GraphState) -> GraphState:
     llm = get_llm()
     messages = state.get("messages", [])
-    if not messages:
-        return state
-    
+    if not messages: return state
     last_message = messages[-1].content
-    chain = INTENT_DETECTION_PROMPT | llm
     try:
-        response = chain.invoke({"message": last_message})
+        response = await (INTENT_DETECTION_PROMPT | llm).ainvoke({"message": last_message})
         intent = response.content.strip()
     except Exception as e:
-        intent = "log_interaction" # fallback
-    
+        logger.error(f"Intent detection failed: {e}")
+        intent = "log_interaction"
     return {"current_intent": intent}
 
-from pydantic import BaseModel, Field
-from typing import Optional, List
-
-class ExtractedEntities(BaseModel):
-    doctor: Optional[str] = Field(description="Name of the doctor/HCP", default=None)
-    hospital: Optional[str] = Field(description="Hospital or clinic name", default=None)
-    products: List[str] = Field(description="List of products discussed", default_factory=list)
-    sentiment: Optional[str] = Field(description="Estimate the doctor's sentiment (Positive, Neutral, Negative)", default=None)
-    action_items: List[str] = Field(description="List of actionable tasks", default_factory=list)
-    follow_up: Optional[str] = Field(description="When the next follow-up should be", default=None)
-
-def extract_entities(state: GraphState) -> GraphState:
-    llm = get_llm()
-    messages = state.get("messages", [])
-    if not messages:
-        return state
-    
-    last_message = messages[-1].content
-    
-    # Use with_structured_output for robust parsing
-    structured_llm = llm.with_structured_output(ExtractedEntities)
-    chain = ENTITY_EXTRACTION_PROMPT | structured_llm
-    
-    try:
-        response = chain.invoke({"message": last_message})
-        entities = response.model_dump()
-    except Exception as e:
-        entities = {"error": "Failed to parse entities", "raw": str(e)}
-        
-    return {"extracted_entities": entities}
-
-def retrieve_memory(state: GraphState) -> GraphState:
-    # Mocking memory retrieval
+async def context_retrieval(state: GraphState) -> GraphState:
     return {"memory_context": "Previous visit: Discussed competitor product."}
 
-def select_tool(state: GraphState) -> GraphState:
+def extract_json_block(text: str) -> str:
+    """Helper to strip markdown backticks if the LLM hallucinated them."""
+    match = re.search(r"```(?:json)?(.*?)```", text, re.DOTALL)
+    if match:
+        return match.group(1).strip()
+    return text.strip()
+
+# Relaxed Wrapper Schema for Validation
+class RobustExtractionSchema(BaseModel):
+    extracted_data: StructuredData = Field(default_factory=StructuredData)
+    confidence_scores: Dict[str, Optional[str]] = Field(default_factory=dict)
+
+async def entity_extraction(state: GraphState) -> GraphState:
     llm = get_llm()
-    intent = state.get("current_intent", "log_interaction")
-    chain = TOOL_SELECTION_PROMPT | llm
+    messages = state.get("messages", [])
+    if not messages: return state
+    last_message = messages[-1].content
+    
+    logger.info(f"--- EXTRACTION PIPELINE START ---")
+    logger.info(f"Raw Prompt: {last_message}")
+    
+    # Notice we DO NOT use with_structured_output(). We call the LLM directly.
+    chain = ENTITY_EXTRACTION_PROMPT | llm
+    
     try:
-        response = chain.invoke({"intent": intent})
-        tool_name = response.content.strip()
-    except:
-        tool_name = "log_interaction_tool"
-    return {"selected_tool": tool_name}
+        response = await chain.ainvoke({"message": last_message})
+        raw_text = response.content
+        logger.info(f"Raw LLM Output:\n{raw_text}")
+        
+        # 1. Clean Markdown
+        clean_json = extract_json_block(raw_text)
+        
+        # 2. Parse JSON
+        parsed_dict = json.loads(clean_json)
+        
+        # 3. Validate with Relaxed Pydantic Schema
+        validated_data = RobustExtractionSchema.model_validate(parsed_dict)
+        
+        entities = validated_data.extracted_data.model_dump(exclude_unset=True)
+        confidence = validated_data.confidence_scores
+        
+        logger.info(f"Successfully Validated Schema.")
+        
+    except json.JSONDecodeError as e:
+        logger.error(f"JSON Parsing Failed: {e}")
+        entities, confidence = {}, {}
+    except ValidationError as e:
+        logger.error(f"Pydantic Schema Mismatch: {e}")
+        entities, confidence = {}, {}
+    except Exception as e:
+        logger.error(f"Unexpected Extraction Error: {e}")
+        entities, confidence = {}, {}
+        
+    return {"extracted_entities": entities, "confidence_scores": confidence}
 
-async def execute_selected_tool(state: GraphState) -> GraphState:
-    tool_name = state.get("selected_tool")
+async def schema_validation(state: GraphState) -> GraphState:
     entities = state.get("extracted_entities", {})
-    output = await execute_tool(tool_name, entities)
-    return {"tool_output": output}
+    status = {"is_valid": True, "missing_fields": []}
+    if not entities.get("hcp", {}).get("doctor_name"):
+        status["is_valid"] = False
+        status["missing_fields"].append("hcp.doctor_name")
+    
+    return {"validation_status": status, "needs_confirmation": not status["is_valid"]}
 
-def validate_data(state: GraphState) -> GraphState:
-    # Dummy validation node
-    needs_confirmation = True
-    if state.get("current_intent") in ["search_interaction", "get_insights"]:
-        needs_confirmation = False
-    return {"needs_confirmation": needs_confirmation}
+# --- NORMALIZATION UTILITIES ---
 
-def format_response(state: GraphState) -> GraphState:
+def normalize_sentiment(val: str) -> str:
+    if not val: return None
+    val = val.lower()
+    if any(word in val for word in ["positive", "good", "great", "interested"]): return "Positive"
+    if any(word in val for word in ["negative", "bad", "poor", "uninterested", "objection"]): return "Negative"
+    return "Neutral"
+
+def normalize_level(val: str) -> str:
+    if not val: return None
+    val = val.lower()
+    if any(word in val for word in ["high", "very", "definitely", "strong"]): return "High"
+    if any(word in val for word in ["low", "not", "never", "weak"]): return "Low"
+    return "Medium"
+
+def normalize_interaction_type(val: str) -> str:
+    if not val: return "Meeting"
+    val = val.lower()
+    if "video" in val or "zoom" in val: return "Video Call"
+    if "phone" in val or "call" in val: return "Phone Call"
+    return "Meeting"
+
+async def normalization(state: GraphState) -> GraphState:
+    """
+    Normalizes specific fields to strict enum values or standard terminology.
+    """
+    entities = state.get("extracted_entities", {}).copy()
+    confidence = state.get("confidence_scores", {}).copy()
+    
+    logger.info("--- NORMALIZATION ENGINE ---")
+    
+    if "outcome" in entities:
+        if entities["outcome"].get("sentiment"):
+            entities["outcome"]["sentiment"] = normalize_sentiment(entities["outcome"]["sentiment"])
+        if entities["outcome"].get("prescription_intent"):
+            entities["outcome"]["prescription_intent"] = normalize_level(entities["outcome"]["prescription_intent"])
+            
+    if "interaction" in entities and entities["interaction"].get("type"):
+        entities["interaction"]["type"] = normalize_interaction_type(entities["interaction"]["type"])
+        
+    if "ai_recommendation" in entities and entities["ai_recommendation"].get("confidence"):
+        entities["ai_recommendation"]["confidence"] = normalize_level(entities["ai_recommendation"]["confidence"])
+        
+    # Normalize flat confidence scores
+    for k, v in confidence.items():
+        if isinstance(v, str):
+            confidence[k] = normalize_level(v)
+            
+    logger.info(f"Normalized Entities: {entities}")
+    logger.info(f"Normalized Confidences: {confidence}")
+            
+    return {"extracted_entities": entities, "confidence_scores": confidence}
+
+async def log_interaction(state: GraphState) -> GraphState:
+    return {"tool_output": {"status": "pending_user_confirmation"}}
+
+async def frontend_preview(state: GraphState) -> GraphState:
     llm = get_llm()
     entities = state.get("extracted_entities", {})
-    tool_output = state.get("tool_output", {})
     chain = RESPONSE_FORMATTER_PROMPT | llm
     try:
-        response = chain.invoke({
-            "extracted_entities": json.dumps(entities),
-            "tool_output": json.dumps(tool_output)
-        })
+        response = await chain.ainvoke({"extracted_entities": json.dumps(entities)})
         final_text = response.content
     except Exception as e:
-        final_text = "Summary generated. Would you like me to save this interaction?"
+        logger.error(f"Failed to format response: {e}")
+        final_text = "Interaction processed."
         
     return {"final_response": final_text}
