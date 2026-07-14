@@ -4,7 +4,7 @@ import { AlertTriangle, Lightbulb, Target } from 'lucide-react';
 import { useSelector } from 'react-redux';
 
 export const CopilotInsights = () => {
-  const suggestions = useSelector(state => state.interaction.aiSuggestions);
+  const suggestions = useSelector(state => state.chat.aiSuggestions);
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5, mb: 2 }}>

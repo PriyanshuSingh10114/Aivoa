@@ -1,34 +1,29 @@
 import React from 'react';
-import { Card, CardContent, Typography, Box } from '@mui/material';
-import { Lightbulb, AlertTriangle } from 'lucide-react';
+import { Box, Typography } from '@mui/material';
+import { Lightbulb } from 'lucide-react';
 
-const InsightCard = () => {
+export const InsightCard = () => {
   return (
-    <Card sx={{ bgcolor: 'white', mb: 2, border: '1px solid #E5E7EB', borderRadius: 3, boxShadow: 'none' }}>
-      <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
-          <Lightbulb size={18} color="#F59E0B" />
-          <Typography variant="subtitle2" color="text.primary" fontWeight="bold">
-            Smart Insights
-          </Typography>
-        </Box>
-        
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-          <Box sx={{ display: 'flex', gap: 1.5, p: 1, bgcolor: '#FEF3C7', borderRadius: 2, border: '1px solid #FDE68A' }}>
-            <AlertTriangle size={16} color="#D97706" style={{ marginTop: 2 }} />
-            <Typography variant="body2" color="#92400E">
-              Doctor has not been visited for 18 days. High engagement probability for CardioX.
-            </Typography>
-          </Box>
-          <Box sx={{ display: 'flex', gap: 1.5, p: 1, bgcolor: '#F3F4F6', borderRadius: 2 }}>
-            <Typography variant="body2" color="text.secondary">
-              Mention the latest clinical trial results published last week.
-            </Typography>
-          </Box>
-        </Box>
-      </CardContent>
-    </Card>
+    <Box sx={{ 
+      p: 2, 
+      mb: 2,
+      bgcolor: 'rgba(245, 158, 11, 0.1)', 
+      border: '1px solid rgba(245, 158, 11, 0.2)',
+      borderRadius: 2,
+      display: 'flex',
+      gap: 1.5,
+      alignItems: 'flex-start'
+    }}>
+      <Lightbulb size={20} color="#D97706" style={{ marginTop: 2 }} />
+      <Box>
+        <Typography variant="subtitle2" sx={{ color: '#D97706', fontWeight: 600, mb: 0.5 }}>
+          Smart Insight
+        </Typography>
+        <Typography variant="body2" sx={{ color: '#92400E', lineHeight: 1.5 }}>
+          Dr. Kumar has not been visited in 18 days. His engagement score is High (92). 
+          Last time you discussed CardioX.
+        </Typography>
+      </Box>
+    </Box>
   );
 };
-
-export default InsightCard;

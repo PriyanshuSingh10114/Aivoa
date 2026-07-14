@@ -32,23 +32,34 @@ def detect_intent(state: GraphState) -> GraphState:
     
     return {"current_intent": intent}
 
+from pydantic import BaseModel, Field
+from typing import Optional, List
+
+class ExtractedEntities(BaseModel):
+    doctor: Optional[str] = Field(description="Name of the doctor/HCP", default=None)
+    hospital: Optional[str] = Field(description="Hospital or clinic name", default=None)
+    products: List[str] = Field(description="List of products discussed", default_factory=list)
+    sentiment: Optional[str] = Field(description="Estimate the doctor's sentiment (Positive, Neutral, Negative)", default=None)
+    action_items: List[str] = Field(description="List of actionable tasks", default_factory=list)
+    follow_up: Optional[str] = Field(description="When the next follow-up should be", default=None)
+
 def extract_entities(state: GraphState) -> GraphState:
     llm = get_llm()
     messages = state.get("messages", [])
+    if not messages:
+        return state
+    
     last_message = messages[-1].content
     
-    chain = ENTITY_EXTRACTION_PROMPT | llm
+    # Use with_structured_output for robust parsing
+    structured_llm = llm.with_structured_output(ExtractedEntities)
+    chain = ENTITY_EXTRACTION_PROMPT | structured_llm
+    
     try:
         response = chain.invoke({"message": last_message})
-        # Basic JSON parsing from the string output
-        # In a robust setup, use output parsers or OpenAI function calling style if supported
-        raw_content = response.content.strip()
-        # Find json block if fenced
-        if "```json" in raw_content:
-            raw_content = raw_content.split("```json")[1].split("```")[0].strip()
-        entities = json.loads(raw_content)
+        entities = response.model_dump()
     except Exception as e:
-        entities = {"error": "Failed to parse entities", "raw": response.content if 'response' in locals() else str(e)}
+        entities = {"error": "Failed to parse entities", "raw": str(e)}
         
     return {"extracted_entities": entities}
 

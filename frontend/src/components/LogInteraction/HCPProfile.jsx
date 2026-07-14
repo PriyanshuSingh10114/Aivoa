@@ -4,7 +4,7 @@ import { MapPin, Target } from 'lucide-react';
 import { useSelector } from 'react-redux';
 
 const HCPProfile = () => {
-  const form = useSelector(state => state.interaction.interactionForm);
+  const form = useSelector(state => state.form.interactionForm);
   const name = form.doctorName || 'Dr. Rahul Sharma'; // Default for demo
 
   return (

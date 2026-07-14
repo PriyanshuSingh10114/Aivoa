@@ -1,8 +1,10 @@
 import { configureStore } from '@reduxjs/toolkit';
-import interactionReducer from './slices/interactionSlice';
+import formReducer from './slices/formSlice';
+import chatReducer from './slices/chatSlice';
 
 export const store = configureStore({
   reducer: {
-    interaction: interactionReducer,
+    form: formReducer,
+    chat: chatReducer,
   },
 });

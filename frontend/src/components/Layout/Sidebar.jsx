@@ -1,103 +1,77 @@
 import React from 'react';
-import { Box, Drawer, List, ListItem, ListItemIcon, ListItemText, Typography, Avatar } from '@mui/material';
-import { LayoutDashboard, Users, Calendar, BarChart2, Settings } from 'lucide-react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { Box, Typography, List, ListItem, ListItemIcon, ListItemText, Divider, Avatar } from '@mui/material';
+import { LayoutDashboard, Users, Calendar, MessageSquare, Settings, Activity } from 'lucide-react';
 
-const drawerWidth = 240;
-
-const Sidebar = () => {
-  const location = useLocation();
-  const navigate = useNavigate();
-
-  const primaryMenuItems = [
-    { text: 'Dashboard', icon: <LayoutDashboard size={18} />, path: '/dashboard' },
-    { text: 'HCP Log', icon: <Users size={18} />, path: '/log' },
-    { text: 'Calendar', icon: <Calendar size={18} />, path: '/calendar' },
-    { text: 'Analytics', icon: <BarChart2 size={18} />, path: '/analytics' },
-    { text: 'Settings', icon: <Settings size={18} />, path: '/settings' },
+export const Sidebar = () => {
+  const menuItems = [
+    { text: 'Dashboard', icon: <LayoutDashboard size={20} />, active: false },
+    { text: 'HCP Directory', icon: <Users size={20} />, active: false },
+    { text: 'Interactions', icon: <MessageSquare size={20} />, active: true },
+    { text: 'Calendar', icon: <Calendar size={20} />, active: false },
+    { text: 'Analytics', icon: <Activity size={20} />, active: false },
   ];
 
-  const renderMenuItem = (item) => {
-    const isActive = location.pathname === item.path || (item.path !== '/dashboard' && location.pathname.startsWith(item.path));
-    return (
-      <ListItem 
-        button 
-        key={item.text} 
-        onClick={() => navigate(item.path)}
-        sx={{
-          py: 0.75,
-          px: 1.5,
-          mb: 0.25,
-          borderRadius: 1.5,
-          backgroundColor: isActive ? 'rgba(37, 99, 235, 0.08)' : 'transparent',
-          color: isActive ? 'primary.main' : 'text.secondary',
-          '&:hover': {
-            backgroundColor: isActive ? 'rgba(37, 99, 235, 0.12)' : 'rgba(0, 0, 0, 0.04)',
-            color: isActive ? 'primary.main' : 'text.primary',
-          }
-        }}
-      >
-        <ListItemIcon sx={{ color: 'inherit', minWidth: 32 }}>
-          {item.icon}
-        </ListItemIcon>
-        <ListItemText 
-          primary={item.text} 
-          primaryTypographyProps={{ fontSize: 13, fontWeight: isActive ? 600 : 500 }} 
-        />
-      </ListItem>
-    );
-  };
-
   return (
-    <Drawer
-      variant="permanent"
-      sx={{
-        width: drawerWidth,
+    <Box 
+      sx={{ 
+        width: 260, 
         flexShrink: 0,
-        '& .MuiDrawer-paper': {
-          width: drawerWidth,
-          boxSizing: 'border-box',
-          backgroundColor: '#F8FAFC',
-          borderRight: '1px solid #E5E7EB',
-          display: 'flex',
-          flexDirection: 'column'
-        },
+        height: '100vh', 
+        bgcolor: '#FFFFFF', 
+        borderRight: '1px solid #E2E8F0',
+        display: 'flex',
+        flexDirection: 'column'
       }}
     >
-      {/* Brand Header */}
-      <Box sx={{ p: 2, display: 'flex', alignItems: 'center', gap: 1.5, mb: 1 }}>
-        <Box sx={{ 
-          width: 28, height: 28, borderRadius: 1.5, 
-          background: 'linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%)', 
-          display: 'flex', alignItems: 'center', justifyContent: 'center', 
-          color: 'white', fontWeight: 'bold', fontSize: 14 
-        }}>
-          A
+      {/* Logo Area */}
+      <Box sx={{ p: 3, display: 'flex', alignItems: 'center', gap: 1.5 }}>
+        <Box sx={{ width: 32, height: 32, bgcolor: 'primary.main', borderRadius: 2, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <Activity size={20} color="white" />
         </Box>
-        <Typography variant="h6" color="text.primary" fontSize={16} fontWeight="bold" letterSpacing="-0.02em">
-          Aiova Health
-        </Typography>
-      </Box>
-      
-      {/* Primary Navigation */}
-      <Box sx={{ flexGrow: 1, px: 1.5, overflowY: 'auto' }}>
-        <List sx={{ pt: 0 }}>
-          {primaryMenuItems.map(renderMenuItem)}
-        </List>
+        <Typography variant="h3" sx={{ fontWeight: 700, color: 'primary.main' }}>Aiova</Typography>
       </Box>
 
-      {/* User Footer */}
-      <Box sx={{ p: 1.5, borderTop: '1px solid #E5E7EB' }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, p: 1, borderRadius: 1.5, '&:hover': { bgcolor: 'rgba(0,0,0,0.04)', cursor: 'pointer' } }}>
-          <Avatar sx={{ width: 32, height: 32, bgcolor: 'primary.main', fontSize: 12 }}>RS</Avatar>
-          <Box sx={{ flexGrow: 1, overflow: 'hidden' }}>
-            <Typography variant="subtitle2" fontSize={13} noWrap>Rahul Sharma</Typography>
-            <Typography variant="caption" fontSize={11} color="text.secondary" noWrap>Rep (North)</Typography>
+      <Divider />
+
+      {/* Navigation */}
+      <List sx={{ px: 2, py: 3, flexGrow: 1 }}>
+        <Typography variant="caption" sx={{ px: 2, mb: 1, display: 'block' }}>Main Menu</Typography>
+        {menuItems.map((item) => (
+          <ListItem 
+            button 
+            key={item.text}
+            sx={{
+              borderRadius: 2,
+              mb: 0.5,
+              bgcolor: item.active ? 'primary.main' : 'transparent',
+              color: item.active ? 'primary.contrastText' : 'text.secondary',
+              '&:hover': {
+                bgcolor: item.active ? 'primary.main' : 'rgba(37, 99, 235, 0.05)',
+                color: item.active ? 'white' : 'primary.main',
+              }
+            }}
+          >
+            <ListItemIcon sx={{ minWidth: 36, color: 'inherit' }}>
+              {item.icon}
+            </ListItemIcon>
+            <ListItemText 
+              primary={item.text} 
+              primaryTypographyProps={{ variant: 'body2', fontWeight: item.active ? 600 : 500 }} 
+            />
+          </ListItem>
+        ))}
+      </List>
+
+      {/* User Area */}
+      <Box sx={{ p: 3, borderTop: '1px solid #E2E8F0' }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+          <Avatar sx={{ width: 36, height: 36, bgcolor: 'secondary.light' }}>JS</Avatar>
+          <Box>
+            <Typography variant="body2" sx={{ fontWeight: 600, color: 'text.primary' }}>John Smith</Typography>
+            <Typography variant="caption" sx={{ color: 'text.secondary', textTransform: 'none' }}>Field Rep</Typography>
           </Box>
         </Box>
       </Box>
-    </Drawer>
+    </Box>
   );
 };
-
-export default Sidebar;

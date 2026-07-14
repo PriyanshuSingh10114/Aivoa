@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Box, Typography, InputBase, IconButton, Avatar, CircularProgress, Paper, Chip } from '@mui/material';
 import { Send, Bot, Sparkles, AlertCircle, Clock } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
-import { sendChatMessage } from '../../redux/slices/interactionSlice';
+import { sendChatMessage } from '../../redux/slices/chatSlice';
 
 const QuickPrompts = ({ onSelect }) => {
   const prompts = ["Summarize notes", "Find prior visits", "Schedule follow-up"];
@@ -20,7 +20,7 @@ const QuickPrompts = ({ onSelect }) => {
 
 const CopilotChat = () => {
   const dispatch = useDispatch();
-  const { chatMessages, isLoading } = useSelector(state => state.interaction);
+  const { chatMessages, isLoading } = useSelector(state => state.chat);
   const [input, setInput] = useState('');
   const endRef = useRef(null);
 
@@ -84,12 +84,22 @@ const CopilotChat = () => {
           '&:focus-within': { bgcolor: 'white', boxShadow: '0 0 0 2px rgba(37,99,235,0.2)' }
         }}>
           <InputBase
-            multiline maxRows={3} fullWidth placeholder="Message Copilot..."
-            value={input} onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), handleSend())}
-            sx={{ fontSize: 13, py: 0.5 }}
+            fullWidth
+            placeholder="Ask Copilot..."
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyPress={(e) => e.key === 'Enter' && handleSend()}
+            disabled={isLoading}
+            inputProps={{ 'aria-label': 'Ask Copilot' }}
+            sx={{ fontSize: 14 }}
           />
-          <IconButton size="small" sx={{ mb: 0.5, bgcolor: input.trim() ? 'primary.main' : 'transparent', color: input.trim() ? 'white' : 'text.disabled', '&:hover': { bgcolor: input.trim() ? 'primary.dark' : 'transparent' } }} onClick={() => handleSend()}>
+          <IconButton 
+            color="primary" 
+            onClick={() => handleSend()} 
+            disabled={!input.trim() || isLoading}
+            aria-label="Send message"
+            sx={{ mb: 0.5, bgcolor: input.trim() ? 'primary.main' : 'transparent', color: input.trim() ? 'white' : 'text.disabled', '&:hover': { bgcolor: input.trim() ? 'primary.dark' : 'transparent' } }}
+          >
             <Send size={14} />
           </IconButton>
         </Box>

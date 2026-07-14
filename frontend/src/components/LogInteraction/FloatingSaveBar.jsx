@@ -5,8 +5,8 @@ import { useSelector } from 'react-redux';
 import { saveInteraction } from '../../services/api';
 
 const FloatingSaveBar = () => {
-  const form = useSelector(state => state.interaction.interactionForm);
-  const { isLoading } = useSelector(state => state.interaction);
+  const form = useSelector(state => state.form.interactionForm);
+  const { isLoading } = useSelector(state => state.chat);
 
   const handleSave = async () => {
     try {

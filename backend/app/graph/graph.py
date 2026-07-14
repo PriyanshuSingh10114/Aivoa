@@ -1,4 +1,5 @@
 from langgraph.graph import StateGraph, END
+from langgraph.checkpoint.memory import MemorySaver
 from app.graph.state import GraphState
 from app.graph.nodes import (
     detect_intent,
@@ -33,8 +34,9 @@ def build_graph() -> StateGraph:
     workflow.add_edge("validation", "response_formatter")
     workflow.add_edge("response_formatter", END)
     
-    # Compile
-    return workflow.compile()
+    # Compile with Memory
+    memory = MemorySaver()
+    return workflow.compile(checkpointer=memory)
 
 # Instantiate the agent
 crm_agent = build_graph()
