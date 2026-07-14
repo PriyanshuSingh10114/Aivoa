@@ -2,7 +2,7 @@ import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider, CssBaseline, Box, Typography } from '@mui/material';
 import { theme } from './theme';
-import DashboardLayout from './layouts/DashboardLayout';
+import Shell from './components/Layout/Shell';
 import LogInteraction from './pages/LogInteraction';
 
 function App() {
@@ -11,7 +11,7 @@ function App() {
       <CssBaseline />
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<DashboardLayout />}>
+          <Route path="/" element={<Shell />}>
             <Route index element={<Navigate to="/log" replace />} />
             <Route path="log" element={<LogInteraction />} />
             {/* Future routes */}
