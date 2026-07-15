@@ -91,7 +91,7 @@ class ChatRequest(BaseModel):
 class ChatResponse(BaseModel):
     reply: str
     structured_data: StructuredData
-    confidence: Dict[str, Optional[str]] = {}
+    confidence: Dict[str, Any] = {}
     status: str = "success"
     needs_confirmation: bool = True
 

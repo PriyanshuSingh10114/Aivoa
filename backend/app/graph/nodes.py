@@ -48,7 +48,7 @@ def extract_json_block(text: str) -> str:
 # Relaxed Wrapper Schema for Validation
 class RobustExtractionSchema(BaseModel):
     extracted_data: StructuredData = Field(default_factory=StructuredData)
-    confidence_scores: Dict[str, Optional[str]] = Field(default_factory=dict)
+    confidence_scores: Dict[str, Any] = Field(default_factory=dict)
 
 async def entity_extraction(state: GraphState) -> GraphState:
     llm = get_llm()
@@ -146,10 +146,15 @@ async def normalization(state: GraphState) -> GraphState:
     if "ai_recommendation" in entities and entities["ai_recommendation"].get("confidence"):
         entities["ai_recommendation"]["confidence"] = normalize_level(entities["ai_recommendation"]["confidence"])
         
-    # Normalize flat confidence scores
-    for k, v in confidence.items():
-        if isinstance(v, str):
-            confidence[k] = normalize_level(v)
+    # Normalize flat and nested confidence scores
+    def normalize_dict(d: dict):
+        for k, v in d.items():
+            if isinstance(v, str):
+                d[k] = normalize_level(v)
+            elif isinstance(v, dict):
+                normalize_dict(v)
+                
+    normalize_dict(confidence)
             
     logger.info(f"Normalized Entities: {entities}")
     logger.info(f"Normalized Confidences: {confidence}")
