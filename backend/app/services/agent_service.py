@@ -6,7 +6,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 class AgentService:
-    async def process_chat(self, message: str, session_id: str = "default_session") -> Dict[str, Any]:
+    async def process_chat(self, message: str, current_state: Dict[str, Any] = None, session_id: str = "default_session") -> Dict[str, Any]:
         """
         Process a user message through the LangGraph AI Agent with Veeva CRM pipeline.
         """
@@ -15,7 +15,7 @@ class AgentService:
                 "messages": [HumanMessage(content=message)],
                 "current_intent": None,
                 "memory_context": "",
-                "extracted_entities": {},
+                "extracted_entities": current_state or {},
                 "crm_mapped_data": {},
                 "confidence_scores": {},
                 "validation_status": {},

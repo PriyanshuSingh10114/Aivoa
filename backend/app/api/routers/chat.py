@@ -14,7 +14,10 @@ async def chat_interaction(
     Process a chat message from the user and return extracted CRM entities.
     """
     try:
-        response = await agent_service.process_chat(request.message)
+        response = await agent_service.process_chat(
+            message=request.message,
+            current_state=request.current_state
+        )
         return response
     except Exception as e:
         # In a real app, you might want more specific exception handling here

@@ -4,18 +4,30 @@ import { Send, CheckCircle2, Trash2, AlertCircle, PlusCircle } from 'lucide-reac
 import { useSelector, useDispatch } from 'react-redux';
 import { saveInteraction } from '../../services/api';
 import { resetForm } from '../../redux/slices/formSlice';
-import { clearChat } from '../../redux/slices/chatSlice';
+import { clearChat, resetActionFlags } from '../../redux/slices/chatSlice';
+import { useEffect } from 'react';
 
 export const StickyActionBar = () => {
   const dispatch = useDispatch();
   const form = useSelector(state => state.form.interactionForm);
   const chatMessages = useSelector(state => state.chat.chatMessages);
-  const { isLoading: isChatLoading } = useSelector(state => state.chat);
+  const { isLoading: isChatLoading, shouldSave, shouldClear } = useSelector(state => state.chat);
   
   const [isSaving, setIsSaving] = useState(false);
   const [savedId, setSavedId] = useState(null);
   const [validationErrors, setValidationErrors] = useState([]);
   const [saveError, setSaveError] = useState(null);
+
+  useEffect(() => {
+    if (shouldSave) {
+      handleSave();
+      dispatch(resetActionFlags());
+    }
+    if (shouldClear) {
+      handleClear();
+      dispatch(resetActionFlags());
+    }
+  }, [shouldSave, shouldClear, dispatch]);
 
   const validateForm = () => {
     const errors = [];
@@ -46,8 +58,8 @@ export const StickyActionBar = () => {
 
     setIsSaving(true);
     try {
-      // Pass both the form data and the chat history
-      const response = await saveInteraction(form, chatMessages);
+      // Pass both the form data and the chat history, plus savedId if we are updating
+      const response = await saveInteraction(form, chatMessages, savedId);
       setSavedId(response.interaction_id);
       setIsSaving(false);
     } catch (e) {

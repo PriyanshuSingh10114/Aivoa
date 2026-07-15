@@ -12,7 +12,8 @@ const initialState = {
     follow_up: { date: '', notes: '' },
     ai_recommendation: { next_best_action: '', confidence: '' }
   },
-  confidence: {}
+  confidence: {},
+  updatedFields: []
 };
 
 // Helper for deep merging
@@ -24,11 +25,9 @@ const mergeState = (target, source) => {
   Object.keys(source).forEach(key => {
     const sourceVal = source[key];
     if (sourceVal !== null && sourceVal !== undefined) {
-      if (Array.isArray(sourceVal)) {
-        if (sourceVal.length > 0) result[key] = sourceVal;
-      } else if (typeof sourceVal === 'object') {
+      if (typeof sourceVal === 'object' && !Array.isArray(sourceVal)) {
         result[key] = mergeState(result[key], sourceVal);
-      } else if (sourceVal !== "") {
+      } else {
         result[key] = sourceVal;
       }
     }
@@ -36,24 +35,55 @@ const mergeState = (target, source) => {
   return result;
 };
 
+// Helper to track which fields changed
+const getUpdatedKeys = (oldObj, newObj, path = '') => {
+  let keys = [];
+  if (!newObj) return keys;
+  
+  Object.keys(newObj).forEach(k => {
+    const newVal = newObj[k];
+    const oldVal = oldObj[k];
+    const currentPath = path ? `${path}.${k}` : k;
+    
+    if (newVal !== null && newVal !== undefined) {
+      if (Array.isArray(newVal)) {
+        if (JSON.stringify(newVal) !== JSON.stringify(oldVal)) keys.push(currentPath);
+      } else if (typeof newVal === 'object') {
+        keys = [...keys, ...getUpdatedKeys(oldVal || {}, newVal, currentPath)];
+      } else {
+        if (newVal !== oldVal) keys.push(currentPath);
+      }
+    }
+  });
+  return keys;
+};
+
 const formSlice = createSlice({
   name: 'form',
   initialState,
   reducers: {
     updateInteractionForm: (state, action) => {
+      const diff = getUpdatedKeys(state.interactionForm, action.payload);
+      state.updatedFields = diff;
       state.interactionForm = mergeState(state.interactionForm, action.payload);
+    },
+    clearUpdatedFields: (state) => {
+      state.updatedFields = [];
     },
     resetForm: (state) => {
       state.interactionForm = initialState.interactionForm;
       state.confidence = {};
+      state.updatedFields = [];
     }
   },
   extraReducers: (builder) => {
     // Automatically update form when AI returns extracted concise entities
     builder.addCase(sendChatMessage.fulfilled, (state, action) => {
-      const { structured_data, confidence } = action.payload;
+      const { structured_data, confidence, reply } = action.payload;
       
-      if (structured_data) {
+      if (structured_data && reply !== "save_action_triggered" && reply !== "clear_action_triggered") {
+        const diff = getUpdatedKeys(state.interactionForm, structured_data);
+        state.updatedFields = diff;
         state.interactionForm = mergeState(state.interactionForm, structured_data);
       }
       
@@ -65,5 +95,5 @@ const formSlice = createSlice({
   }
 });
 
-export const { updateInteractionForm, resetForm } = formSlice.actions;
+export const { updateInteractionForm, resetForm, clearUpdatedFields } = formSlice.actions;
 export default formSlice.reducer;

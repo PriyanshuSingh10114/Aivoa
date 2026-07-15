@@ -87,6 +87,7 @@ class StructuredData(BaseModel):
 class ChatRequest(BaseModel):
     message: str
     doctor_name: Optional[str] = None
+    current_state: Optional[Dict[str, Any]] = None
 
 class ChatResponse(BaseModel):
     reply: str
@@ -103,3 +104,4 @@ class ConversationMessageSchema(BaseModel):
 class SaveInteractionRequest(BaseModel):
     data: StructuredData
     conversation: List[ConversationMessageSchema] = []
+    interaction_id: Optional[str] = None

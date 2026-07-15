@@ -93,6 +93,42 @@ async def entity_extraction(state: GraphState) -> GraphState:
         
     return {"extracted_entities": entities, "confidence_scores": confidence}
 
+async def edit_interaction_tool(state: GraphState) -> GraphState:
+    from app.graph.prompts import EDIT_INTERACTION_PROMPT
+    llm = get_llm()
+    messages = state.get("messages", [])
+    if not messages: return state
+    last_message = messages[-1].content
+    current_state = state.get("extracted_entities", {})
+    
+    logger.info(f"--- EDIT PIPELINE START ---")
+    chain = EDIT_INTERACTION_PROMPT | llm
+    
+    try:
+        response = await chain.ainvoke({
+            "message": last_message,
+            "current_state": json.dumps(current_state)
+        })
+        raw_text = response.content
+        clean_json = extract_json_block(raw_text)
+        parsed_dict = json.loads(clean_json)
+        
+        entities = parsed_dict.get("extracted_data", parsed_dict) # fallback if nested
+        logger.info(f"Edit JSON parsed successfully: {entities}")
+    except Exception as e:
+        logger.error(f"Edit Failed: {e}")
+        entities = {}
+        
+    return {"extracted_entities": entities}
+
+async def save_interaction_node(state: GraphState) -> GraphState:
+    logger.info("--- SAVE INTENT DETECTED ---")
+    return {"final_response": "save_action_triggered"}
+
+async def clear_interaction_node(state: GraphState) -> GraphState:
+    logger.info("--- CLEAR INTENT DETECTED ---")
+    return {"final_response": "clear_action_triggered"}
+
 async def schema_validation(state: GraphState) -> GraphState:
     entities = state.get("extracted_entities", {})
     status = {"is_valid": True, "missing_fields": []}

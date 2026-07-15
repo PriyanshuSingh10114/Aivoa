@@ -3,7 +3,7 @@ import { Box, Typography, Chip } from '@mui/material';
 import { ConfidenceBadge } from '../../Shared/ConfidenceBadge';
 import { StatusChip } from '../../Shared/StatusChip';
 
-export const PreviewRow = ({ label, value, type = "text", score = 95, source = "AI" }) => {
+export const PreviewRow = ({ label, value, type = "text", score = "Low", isUpdated = false }) => {
   const isEmpty = !value || (Array.isArray(value) && value.length === 0);
 
   const renderValue = () => {
@@ -28,13 +28,21 @@ export const PreviewRow = ({ label, value, type = "text", score = 95, source = "
     <Box sx={{ 
       display: 'flex', 
       py: 2, 
+      px: 1,
       borderBottom: '1px solid #E2E8F0',
       '&:last-child': { borderBottom: 'none', pb: 0 },
-      alignItems: 'flex-start'
+      alignItems: 'flex-start',
+      backgroundColor: isUpdated ? 'rgba(16, 185, 129, 0.1)' : 'transparent',
+      transition: 'background-color 0.5s ease',
+      borderRadius: 1,
+      position: 'relative'
     }}>
       <Box sx={{ width: '35%', pr: 2 }}>
-        <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', mb: 0.5 }}>
+        <Typography variant="caption" sx={{ color: 'text.secondary', display: 'flex', alignItems: 'center', mb: 0.5 }}>
           {label}
+          {isUpdated && (
+            <Chip label="Updated ✔" size="small" sx={{ ml: 1, height: 18, fontSize: '0.65rem', bgcolor: '#10B981', color: 'white', fontWeight: 600 }} />
+          )}
         </Typography>
       </Box>
       <Box sx={{ width: '65%', pr: 2 }}>

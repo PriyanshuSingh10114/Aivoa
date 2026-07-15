@@ -7,15 +7,16 @@ const api = axios.create({
   },
 });
 
-export const chatWithAgent = async (message) => {
-  const response = await api.post('/chat/', { message });
+export const chatWithAgent = async (message, current_state = null) => {
+  const response = await api.post('/chat/', { message, current_state });
   return response.data;
 };
 
-export const saveInteraction = async (data, chatMessages = []) => {
+export const saveInteraction = async (data, chatMessages = [], interactionId = null) => {
   const payload = {
     data,
-    conversation: chatMessages
+    conversation: chatMessages,
+    interaction_id: interactionId
   };
   const response = await api.post('/interaction/', payload);
   return response.data;

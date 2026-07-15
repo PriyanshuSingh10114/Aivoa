@@ -12,10 +12,6 @@ def merge_entities(old_entities: Dict[str, Any], new_entities: Dict[str, Any]) -
         
     for k, v in new_entities.items():
         if v is not None:
-            if isinstance(v, list) and len(v) == 0:
-                continue
-            if isinstance(v, str) and v == "":
-                continue
             if isinstance(v, dict) and k in merged and isinstance(merged[k], dict):
                 merged[k] = merge_entities(merged[k], v)
             else:

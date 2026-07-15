@@ -3,9 +3,44 @@ from langchain_core.prompts import ChatPromptTemplate
 INTENT_DETECTION_PROMPT = ChatPromptTemplate.from_messages([
     ("system", """You are an intent routing engine for an Enterprise AI CRM.
 Determine the user's intent from the following message.
-Options: log_interaction, search_history, edit_interaction, get_insights
+Options: new_interaction, edit_interaction, save_interaction, clear_interaction
 
-Output ONLY the exact intent string from the options above. If unsure, default to 'log_interaction'."""),
+Output ONLY the exact intent string from the options above. 
+If they are providing new details for a visit, output 'new_interaction'.
+If they are correcting or changing existing details, output 'edit_interaction'.
+If they want to save or submit, output 'save_interaction'.
+If they want to clear or reset, output 'clear_interaction'.
+If unsure, default to 'new_interaction'."""),
+    ("user", "{message}")
+])
+
+EDIT_INTERACTION_PROMPT = ChatPromptTemplate.from_messages([
+    ("system", """You are an Enterprise AI CRM Edit Assistant.
+Your job is to read the user's request and update the CURRENT CRM state.
+
+CURRENT STATE:
+{current_state}
+
+RULES:
+1. Only output the exact fields that the user wants to change.
+2. If the user wants to remove an item from a list (e.g. "remove NeuroZ"), output the entire list WITHOUT that item.
+3. Output MUST be valid JSON matching the schema structure. DO NOT use markdown like ```json.
+4. Output ONLY the JSON.
+
+SCHEMA STRUCTURE:
+{{
+  "extracted_data": {{
+    "hcp": {{ "doctor_name": "", "hospital": "", "speciality": "" }},
+    "interaction": {{ "type": "", "date": "", "duration": "" }},
+    "products": {{ "primary": "", "secondary": [], "competitors": [] }},
+    "discussion": {{ "summary": "", "doctor_feedback": "", "objections": [] }},
+    "materials": {{ "shared": [], "samples_distributed": true, "sample_quantity": 0 }},
+    "outcome": {{ "sentiment": "", "prescription_intent": "" }},
+    "follow_up": {{ "date": "", "notes": "" }},
+    "ai_recommendation": {{ "next_best_action": "", "confidence": "" }}
+  }}
+}}
+"""),
     ("user", "{message}")
 ])
 

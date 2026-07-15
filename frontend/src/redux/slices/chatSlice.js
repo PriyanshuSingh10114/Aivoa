@@ -13,14 +13,19 @@ const initialState = {
   aiSuggestions: null,
   isLoading: false,
   error: null,
+  shouldSave: false,
+  shouldClear: false,
 };
 
 export const sendChatMessage = createAsyncThunk(
   'chat/sendChatMessage',
-  async (message, { dispatch }) => {
+  async (message, { dispatch, getState }) => {
+    // Get current form state to provide context to the backend
+    const currentState = getState().form.interactionForm;
+    
     // Dispatch optimistic user message
     dispatch(chatSlice.actions.addOptimisticMessage({ sender: 'user', text: message }));
-    const response = await chatWithAgent(message);
+    const response = await chatWithAgent(message, currentState);
     return response;
   }
 );
@@ -43,6 +48,12 @@ const chatSlice = createSlice({
       state.chatMessages = initialState.chatMessages;
       state.aiSuggestions = null;
       state.error = null;
+      state.shouldSave = false;
+      state.shouldClear = false;
+    },
+    resetActionFlags: (state) => {
+      state.shouldSave = false;
+      state.shouldClear = false;
     }
   },
   extraReducers: (builder) => {
@@ -53,13 +64,23 @@ const chatSlice = createSlice({
       })
       .addCase(sendChatMessage.fulfilled, (state, action) => {
         state.isLoading = false;
-        // Append AI message
-        state.chatMessages.push({
-          id: Date.now(),
-          sender: 'ai',
-          text: action.payload.reply || 'Processed successfully.',
-          timestamp: new Date().toISOString()
-        });
+        // Handle Conversational Actions
+        if (action.payload.reply === "save_action_triggered") {
+          state.shouldSave = true;
+          state.chatMessages.push({
+            id: Date.now(), sender: 'ai', text: 'Saving interaction to CRM...', timestamp: new Date().toISOString()
+          });
+        } else if (action.payload.reply === "clear_action_triggered") {
+          state.shouldClear = true;
+        } else {
+          // Append AI message
+          state.chatMessages.push({
+            id: Date.now(),
+            sender: 'ai',
+            text: action.payload.reply || 'Processed successfully.',
+            timestamp: new Date().toISOString()
+          });
+        }
         
         // Update suggestions if data is valid
         if (action.payload.status === "success") {
@@ -79,5 +100,5 @@ const chatSlice = createSlice({
   }
 });
 
-export const { setAiSuggestions, clearChat } = chatSlice.actions;
+export const { addOptimisticMessage, setAiSuggestions, clearChat, resetActionFlags } = chatSlice.actions;
 export default chatSlice.reducer;
