@@ -1,0 +1,58 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [3 0 R] /Count 1 >>
+endobj
+3 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 4 0 R /Resources << /Font << /F1 5 0 R >> >> >>
+endobj
+4 0 obj
+<< /Length 989 >>
+stream
+BT
+/F1 10 Tf
+40 750 Td
+14 TL
+(RAW MATERIAL / API COMPLAINT NOTIFICATION) '
+(Formulation Plant QA Division) '
+() '
+(Date: 2024-09-02) '
+(Source: Sun Pharma Formulation Plant #4 \(Baddi, HP\)) '
+(Contact: qa_intake@sunpharma.internal) '
+() '
+(Subject: Secondary Packaging Defect - Amoxicillin Trihydrate API Drum) '
+(Product Name: Amoxicillin Trihydrate Compacted Powder) '
+(Grade / Strength: USP / EP Grade) '
+(Batch Number: AMX-2024-099) '
+(Manufacturing Date: 2024-01-10) '
+(Expiry Date: 2027-01-09) '
+(Quantity Affected: 2 Fiber Drums \(50 kg total\)) '
+() '
+(Defect Observation:) '
+(During warehouse receipt inspection, the external tamper-evident security seal on two fiber drums was found snapped. The primary inner double-polyethylene barrier liner remained fully intact with no visible powder breach or moisture ingress.) '
+() '
+(Initial Severity: Major) '
+(Priority: P2 - High) '
+(Requesting QA vendor deviation review and COA verification before release to compounding.) '
+() '
+ET
+endstream
+endobj
+5 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+xref
+0 6
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000115 00000 n 
+0000000229 00000 n 
+0000000000 00000 n 
+trailer
+<< /Size 6 /Root 1 0 R >>
+startxref
+500
+%%EOF

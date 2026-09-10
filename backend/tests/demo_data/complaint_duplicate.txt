@@ -1,0 +1,14 @@
+CUSTOMER COMPLAINT INTAKE - FORTIS HEALTHCARE
+Date: 2024-09-09
+
+Customer: Fortis Healthcare Central Supplies
+Source: Hospital / Clinic
+Contact: pharmacy@fortis.com
+
+Product: Paracetamol Tablets
+Strength: 500mg
+Batch / Lot: PCM240817
+Quantity Affected: 4 blister packs
+
+Description:
+Hospital nursing staff reported brownish discoloration on paracetamol 500mg tablets from batch PCM240817. Defective blister strips quarantined at ward pharmacy.

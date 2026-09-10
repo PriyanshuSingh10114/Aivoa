@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider, CssBaseline, Box, Typography } from '@mui/material';
 import { theme } from './theme';
+import ComplaintManagement from './pages/ComplaintManagement';
 import LogInteraction from './pages/LogInteraction';
 
 function App() {
@@ -10,7 +11,8 @@ function App() {
       <CssBaseline />
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Navigate to="/log" replace />} />
+          <Route path="/" element={<ComplaintManagement />} />
+          <Route path="/complaints" element={<ComplaintManagement />} />
           <Route path="/log" element={<LogInteraction />} />
           <Route path="*" element={<Box p={3}><Typography>404 Not Found</Typography></Box>} />
         </Routes>

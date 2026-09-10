@@ -1,7 +1,7 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
-    PROJECT_NAME: str = "AI-First CRM HCP Module"
+    PROJECT_NAME: str = "Aiova Pharma Complaint Management QMS Module"
     API_V1_STR: str = "/api/v1"
     
     POSTGRES_SERVER: str = "localhost"
@@ -15,7 +15,9 @@ class Settings(BaseSettings):
         return f"postgresql+asyncpg://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}@{self.POSTGRES_SERVER}:{self.POSTGRES_PORT}/{self.POSTGRES_DB}"
     
     GROQ_API_KEY: str = ""
+    GROQ_MODEL: str = "gemma2-9b-it"
+    GROQ_FALLBACK_MODEL: str = "llama-3.3-70b-versatile"
 
-    model_config = SettingsConfigDict(env_file=".env", case_sensitive=True)
+    model_config = SettingsConfigDict(env_file=".env", case_sensitive=True, extra="ignore")
 
 settings = Settings()

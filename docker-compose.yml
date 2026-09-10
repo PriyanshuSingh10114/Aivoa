@@ -31,8 +31,9 @@ services:
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_DB=aiova_crm
       - POSTGRES_PORT=5432
-      # IMPORTANT: Add your Groq API Key here in production or via .env
       - GROQ_API_KEY=${GROQ_API_KEY:-""}
+      - GROQ_MODEL=${GROQ_MODEL:-"gemma2-9b-it"}
+      - GROQ_FALLBACK_MODEL=${GROQ_FALLBACK_MODEL:-"llama-3.3-70b-versatile"}
     depends_on:
       postgres:
         condition: service_healthy
