@@ -14,10 +14,12 @@ export const ProductSection = ({ product, onChange }) => {
 
       <Grid container spacing={2}>
         <Grid item xs={12} sm={8}>
+          <Typography variant="caption" sx={{ fontWeight: 600, color: '#475569', display: 'block', mb: 0.5 }}>
+            Product Name / API
+          </Typography>
           <TextField
             fullWidth
             size="small"
-            label="Product Name / API"
             placeholder="e.g. Paracetamol Tablets / Amoxicillin Trihydrate"
             value={product.product_name || ''}
             onChange={(e) => onChange('product_name', e.target.value)}
@@ -26,10 +28,12 @@ export const ProductSection = ({ product, onChange }) => {
         </Grid>
 
         <Grid item xs={12} sm={4}>
+          <Typography variant="caption" sx={{ fontWeight: 600, color: '#475569', display: 'block', mb: 0.5 }}>
+            Strength / Grade
+          </Typography>
           <TextField
             fullWidth
             size="small"
-            label="Strength / Grade"
             placeholder="e.g. 500mg / USP Grade"
             value={product.product_strength || ''}
             onChange={(e) => onChange('product_strength', e.target.value)}
@@ -38,10 +42,12 @@ export const ProductSection = ({ product, onChange }) => {
         </Grid>
 
         <Grid item xs={12} sm={4}>
+          <Typography variant="caption" sx={{ fontWeight: 600, color: '#475569', display: 'block', mb: 0.5 }}>
+            Batch / Lot Number
+          </Typography>
           <TextField
             fullWidth
             size="small"
-            label="Batch / Lot Number"
             placeholder="e.g. PCM240817"
             value={product.batch_number || ''}
             onChange={(e) => onChange('batch_number', e.target.value)}
@@ -50,36 +56,46 @@ export const ProductSection = ({ product, onChange }) => {
         </Grid>
 
         <Grid item xs={12} sm={4}>
+          <Typography variant="caption" sx={{ fontWeight: 600, color: '#475569', display: 'block', mb: 0.5 }}>
+            Manufacturing Date
+          </Typography>
           <TextField
             fullWidth
             size="small"
             type="date"
-            label="Manufacturing Date"
-            InputLabelProps={{ shrink: true }}
             value={product.manufacturing_date || ''}
             onChange={(e) => onChange('manufacturing_date', e.target.value)}
             variant="outlined"
+            inputProps={{
+              style: { padding: '8.5px 12px' }
+            }}
           />
         </Grid>
 
         <Grid item xs={12} sm={4}>
+          <Typography variant="caption" sx={{ fontWeight: 600, color: '#475569', display: 'block', mb: 0.5 }}>
+            Expiry Date
+          </Typography>
           <TextField
             fullWidth
             size="small"
             type="date"
-            label="Expiry Date"
-            InputLabelProps={{ shrink: true }}
             value={product.expiry_date || ''}
             onChange={(e) => onChange('expiry_date', e.target.value)}
             variant="outlined"
+            inputProps={{
+              style: { padding: '8.5px 12px' }
+            }}
           />
         </Grid>
 
         <Grid item xs={12}>
+          <Typography variant="caption" sx={{ fontWeight: 600, color: '#475569', display: 'block', mb: 0.5 }}>
+            Quantity Affected
+          </Typography>
           <TextField
             fullWidth
             size="small"
-            label="Quantity Affected"
             placeholder="e.g. 10 blister packs (100 tablets), 5 vials"
             value={product.quantity_affected || ''}
             onChange={(e) => onChange('quantity_affected', e.target.value)}

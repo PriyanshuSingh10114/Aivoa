@@ -17,11 +17,13 @@ export const AssessmentSection = ({ assessment, onChange }) => {
 
       <Grid container spacing={2}>
         <Grid item xs={12} sm={6}>
+          <Typography variant="caption" sx={{ fontWeight: 600, color: '#475569', display: 'block', mb: 0.5 }}>
+            Initial Severity
+          </Typography>
           <TextField
             select
             fullWidth
             size="small"
-            label="Initial Severity"
             value={assessment.severity || 'Major'}
             onChange={(e) => onChange('severity', e.target.value)}
             variant="outlined"
@@ -35,11 +37,13 @@ export const AssessmentSection = ({ assessment, onChange }) => {
         </Grid>
 
         <Grid item xs={12} sm={6}>
+          <Typography variant="caption" sx={{ fontWeight: 600, color: '#475569', display: 'block', mb: 0.5 }}>
+            Priority
+          </Typography>
           <TextField
             select
             fullWidth
             size="small"
-            label="Priority"
             value={assessment.priority || 'P2 - High'}
             onChange={(e) => onChange('priority', e.target.value)}
             variant="outlined"

@@ -28,11 +28,13 @@ export const DetailsSection = ({ details, onChange }) => {
 
       <Grid container spacing={2}>
         <Grid item xs={12} sm={8}>
+          <Typography variant="caption" sx={{ fontWeight: 600, color: '#475569', display: 'block', mb: 0.5 }}>
+            Complaint Type / Defect Category
+          </Typography>
           <TextField
             select
             fullWidth
             size="small"
-            label="Complaint Type / Defect Category"
             value={details.complaint_type || ''}
             onChange={(e) => onChange('complaint_type', e.target.value)}
             variant="outlined"
@@ -46,25 +48,31 @@ export const DetailsSection = ({ details, onChange }) => {
         </Grid>
 
         <Grid item xs={12} sm={4}>
+          <Typography variant="caption" sx={{ fontWeight: 600, color: '#475569', display: 'block', mb: 0.5 }}>
+            Complaint Date
+          </Typography>
           <TextField
             fullWidth
             size="small"
             type="date"
-            label="Complaint Date"
-            InputLabelProps={{ shrink: true }}
             value={details.complaint_date || ''}
             onChange={(e) => onChange('complaint_date', e.target.value)}
             variant="outlined"
+            inputProps={{
+              style: { padding: '8.5px 12px' }
+            }}
           />
         </Grid>
 
         <Grid item xs={12}>
+          <Typography variant="caption" sx={{ fontWeight: 600, color: '#475569', display: 'block', mb: 0.5 }}>
+            Detailed Complaint Description
+          </Typography>
           <TextField
             fullWidth
             multiline
             rows={4}
             size="small"
-            label="Detailed Complaint Description"
             placeholder="Detailed narrative describing the observed defect, patient/customer observations, environmental conditions, and packaging state..."
             value={details.description || ''}
             onChange={(e) => onChange('description', e.target.value)}

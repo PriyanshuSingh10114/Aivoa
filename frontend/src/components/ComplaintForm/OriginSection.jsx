@@ -23,11 +23,13 @@ export const OriginSection = ({ origin, onChange }) => {
 
       <Grid container spacing={2}>
         <Grid item xs={12} sm={6}>
+          <Typography variant="caption" sx={{ fontWeight: 600, color: '#475569', display: 'block', mb: 0.5 }}>
+            Complaint Source
+          </Typography>
           <TextField
             select
             fullWidth
             size="small"
-            label="Complaint Source"
             value={origin.complaint_source || ''}
             onChange={(e) => onChange('complaint_source', e.target.value)}
             variant="outlined"
@@ -41,10 +43,12 @@ export const OriginSection = ({ origin, onChange }) => {
         </Grid>
 
         <Grid item xs={12} sm={6}>
+          <Typography variant="caption" sx={{ fontWeight: 600, color: '#475569', display: 'block', mb: 0.5 }}>
+            Customer Name / Institution
+          </Typography>
           <TextField
             fullWidth
             size="small"
-            label="Customer Name / Institution"
             placeholder="e.g. Apollo Hospital Pharmacy"
             value={origin.customer_name || ''}
             onChange={(e) => onChange('customer_name', e.target.value)}
@@ -53,10 +57,12 @@ export const OriginSection = ({ origin, onChange }) => {
         </Grid>
 
         <Grid item xs={12}>
+          <Typography variant="caption" sx={{ fontWeight: 600, color: '#475569', display: 'block', mb: 0.5 }}>
+            Customer Contact / Email / Phone
+          </Typography>
           <TextField
             fullWidth
             size="small"
-            label="Customer Contact / Email / Phone"
             placeholder="e.g. pharmacy@apollo.org / +91 9876543210"
             value={origin.customer_contact || ''}
             onChange={(e) => onChange('customer_contact', e.target.value)}
