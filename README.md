@@ -98,7 +98,7 @@ cd "e:\Internship Assignment\Aiova\backend"
 .\venv\Scripts\Activate.ps1
 
 # Start the FastAPI server
-uvicorn app.main:app --reload --port 8000
+uvicorn main:app --reload --port 8000
 ```
 > **Backend API:** `http://localhost:8000`  
 > **Interactive Swagger Docs:** `http://localhost:8000/docs`
